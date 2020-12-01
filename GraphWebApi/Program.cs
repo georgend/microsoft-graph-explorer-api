@@ -45,10 +45,13 @@ namespace GraphWebApi
             }
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                    .UseStartup<Startup>()
-                    .UseSerilog();
-
+        public static IHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+                webBuilder.UseSerilog();
+            });
+        }
     }
 }

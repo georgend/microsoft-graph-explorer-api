@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.IO;
 using CodeSnippetsReflection;
 using GraphWebApi.Models;
-using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.AspNetCore.Http;
 
 namespace GraphWebApi.Controllers
 {
@@ -43,12 +43,18 @@ namespace GraphWebApi.Controllers
         [Consumes("application/http")]
         public async Task<IActionResult> PostAsync(string lang = "c#")
         {
-            Request.EnableRewind();
+            //Replacement for EnableRewind which was turned into an internal api.
+            //https://stackoverflow.com/questions/57407472/what-is-the-alternate-of-httprequest-enablerewind-in-asp-net-core-3-0
+            //https://github.com/dotnet/aspnetcore/blob/4ef204e13b88c0734e0e94a1cc4c0ef05f40849e/src/Http/Http/src/Extensions/HttpRequestRewindExtensions.cs#L23
+            //https://sourcegraph.com/github.com/dotnet/aspnetcore@4ef204e13b88c0734e0e94a1cc4c0ef05f40849e/-/blob/src/Http/Http/src/Internal/BufferingHelper.cs?utm_source=share#L10:27
+            Request.EnableBuffering();
             var streamContent = new StreamContent(Request.Body);
             streamContent.Headers.Add("Content-Type", "application/http;msgtype=request");
 
             try
             {
+                //Referencing Microsoft.AspNet.WebApi.Client which contains the implementation for ReadAsHttpRequestMessageAsync
+                //https://github.com/dotnet/runtime/issues/27218
                 using (HttpRequestMessage requestPayload = await streamContent.ReadAsHttpRequestMessageAsync().ConfigureAwait(false))
                 {
                     var response = _snippetGenerator.ProcessPayloadRequest(requestPayload, lang);

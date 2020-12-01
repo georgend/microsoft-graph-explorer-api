@@ -15,10 +15,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using EasyCaching.Core;
+using Microsoft.Extensions.Caching.Distributed;
 using UriMatchingService;
 
 namespace GraphExplorerPermissionsService
 {
+    public interface IPermissionsCacheService
+    {
+
+    }
+    /// <summary>
+    /// Abstracts away the caching implementation
+    /// #TODO: Implement caching as an abstraction to avoid depending directly on the library.
+    /// </summary>
+    public class PermissionsCacheService : IPermissionsCacheService
+    {
+
+    }
     public class PermissionsStore : IPermissionsStore
     {
         private UriTemplateMatcher _urlTemplateMatcher;
@@ -35,8 +49,8 @@ namespace GraphExplorerPermissionsService
         private static bool _permissionsRefreshed = false;
         private const string Delegated = "Delegated";
         private const string Application = "Application";
-
-        public PermissionsStore(IFileUtility fileUtility, IConfiguration configuration, IMemoryCache permissionsCache)
+        //#TODO: Switch to IEasyCachingProviderFactory
+        public PermissionsStore(IFileUtility fileUtility, IConfiguration configuration, IMemoryCache permissionsCache /*IEasyCachingProviderFactory  permissionsCache */)
         {
             _defaultRefreshTimeInHours = FileServiceHelper.GetFileCacheRefreshTime(configuration["FileCacheRefreshTimeInHours"]);
             _permissionsCache = permissionsCache;
